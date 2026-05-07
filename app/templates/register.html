@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+      <h2>Registration form</h2>
+      <form action="{{ url_for('auth.register') }}" method="POST">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+          {{form.name.label(for="name")}}
+          {{form.name(id="name",class="form-control")}} {% if form.name.errors
+          %}
+          <ul>
+            {% for error in form.name.errors %}
+            <li style="color: red">{{ error }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          {{form.email.label(for="email")}}
+          {{form.email(id="email",class="form-control")}} {% if
+          form.email.errors %}
+          <ul>
+            {% for error in form.email.errors %}
+            <li style="color: red">{{ error }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          {{form.password.label(for="password")}}
+          {{form.password(id="password",class="form-control")}} {% if
+          form.password.errors %}
+          <ul>
+            {% for error in form.password.errors %}
+            <li style="color: red">{{ error }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+        <div class="form-group">
+        {{form.confirm.label(for="confirm")}}
+        {{form.confirm(id="confirm", class="form-control")}} 
+        {% if form.confirm.errors %}
+          <ul>
+              {% for error in form.confirm.errors %}
+                <li style="color: red">{{ error }}</li>
+              {% endfor %}
+          </ul>
+        {% endif %}
+        </div>
+        {{ form.submit(id="submit", class="btn btn-dark mt-4") }}
+        <a href="/login" class="btn btn-dark mt-4">Already have an account? Login here</a>
+      </form>
+    </div>
+{% endblock %}
+    
