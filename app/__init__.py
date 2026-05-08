@@ -13,11 +13,20 @@ def create_app():
     app = Flask(__name__)
     
     app.secret_key = os.getenv('SECRET_KEY')
-    db_user = os.getenv('DB_USER')
-    db_password = os.getenv('DB_PASSWORD')
-    db_name = os.getenv('DB_NAME', 'vanshdb')  # default to vanshdb if DB_NAME is not provided
-    app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{db_user}:{db_password}@localhost/{db_name}"
-    
+
+    # NEW LOGIC: Use 'DATABASE_URL' if it exists (Railway provides this), 
+    # otherwise build the local string.
+
+    cloud_db = os.getenv('DATABASE_URL')
+    if cloud_db:
+        # Railway URLs start with 'mysql://', which is exactly what we need
+        app.config['SQLALCHEMY_DATABASE_URI'] = cloud_db
+    else:
+        db_user = os.getenv('DB_USER')
+        db_password = os.getenv('DB_PASSWORD')
+        db_name = os.getenv('DB_NAME', 'vanshdb')  # default to vanshdb if DB_NAME is not provided
+        app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{db_user}:{db_password}@{os.getenv('MySQL_HOST', 'localhost')}:{os.getenv('MySQL_PORT', '3306')}/{db_name}"
+
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login' # if user not logged in, redirect to login page
