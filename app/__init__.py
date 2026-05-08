@@ -35,8 +35,6 @@ def create_app():
     # Routes are now organized in routes/ directory with separate files for auth and tasks
     from .routes import register_routes
     register_routes(app)
-    with app.app_context():
-        db.create_all()
 
     return app
 
