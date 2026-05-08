@@ -4,6 +4,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from dotenv import load_dotenv
+import pymysql
+pymysql.install_as_MySQLdb()
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -14,18 +16,12 @@ def create_app():
     
     app.secret_key = os.getenv('SECRET_KEY')
 
-    # NEW LOGIC: Use 'DATABASE_URL' if it exists (Railway provides this), 
-    # otherwise build the local string.
-
     cloud_db = os.getenv('DATABASE_URL')
-    if cloud_db:
-        # Railway URLs start with 'mysql://', which is exactly what we need
-        app.config['SQLALCHEMY_DATABASE_URI'] = cloud_db
-    else:
-        db_user = os.getenv('DB_USER')
-        db_password = os.getenv('DB_PASSWORD')
-        db_name = os.getenv('DB_NAME', 'vanshdb')  # default to vanshdb if DB_NAME is not provided
-        app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql://{db_user}:{db_password}@{os.getenv('MySQL_HOST', 'localhost')}:{os.getenv('MySQL_PORT', '3306')}/{db_name}"
+    if not cloud_db:
+        raise RuntimeError('DATABASE_URL is required for cloud database deployment.')
+
+    app.config['SQLALCHEMY_DATABASE_URI'] = cloud_db
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
     login_manager.init_app(app)
@@ -39,6 +35,8 @@ def create_app():
     # Routes are now organized in routes/ directory with separate files for auth and tasks
     from .routes import register_routes
     register_routes(app)
+    with app.app_context():
+        db.create_all()
 
     return app
 
